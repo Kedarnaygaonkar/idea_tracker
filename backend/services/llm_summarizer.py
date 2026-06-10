@@ -8,7 +8,17 @@ title, category, stage, and keywords using the Gemini free tier.
 import os
 from typing import Dict, Any, Optional
 
-from google import genai
+try:
+    from google import genai
+except Exception:
+    try:
+        # Some installs expose a top-level module name different from the
+        # import path expected in older/newer client versions. Try common
+        # alternatives and fall back to None so the service can raise a
+        # clear error when used.
+        import generativeai as genai  # type: ignore
+    except Exception:
+        genai = None
 
 from backend.models import EvolutionStage
 from backend.services.data_store import DataStore
@@ -35,10 +45,15 @@ class LLMSummarizerService:
     def __init__(self, store: DataStore, model: str = "gemini-2.5-flash"):
         self._store = store
         self._model = model
-        self._client: Optional[genai.Client] = None
+        self._client: Optional[Any] = None
 
-    def _get_client(self) -> genai.Client:
+    def _get_client(self) -> Any:
         """Lazy-initialize the Gemini client."""
+        if genai is None:
+            raise RuntimeError(
+                "google-generativeai package not found. Install 'google-generativeai==0.3.0'"
+            )
+
         if self._client is None:
             api_key = os.environ.get("GEMINI_API_KEY")
             if not api_key:
@@ -46,7 +61,22 @@ class LLMSummarizerService:
                     "GEMINI_API_KEY environment variable is not set. "
                     "Get a free key at https://aistudio.google.com/"
                 )
-            self._client = genai.Client(api_key=api_key)
+            # Client construction differs slightly between package variants;
+            # both provide a Client or similar factory. Use attribute access
+            # dynamically to avoid import-time failures.
+            try:
+                self._client = genai.Client(api_key=api_key)
+            except Exception:
+                # Some package variants use a different constructor name
+                # (e.g., genai.init or generativeai.configure). Normalize here.
+                if hasattr(genai, "init"):
+                    genai.init(api_key=api_key)
+                    self._client = genai
+                elif hasattr(genai, "configure"):
+                    genai.configure(api_key=api_key)
+                    self._client = genai
+                else:
+                    raise
         return self._client
 
     def _build_prompt(self, title: str, category: str, stage: EvolutionStage,

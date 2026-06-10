@@ -69,8 +69,15 @@ class InfluenceEdge:
         Returns:
             InfluenceEdge instance
         """
-        # Convert datetime string to datetime object
-        if isinstance(data.get('created_at'), str):
-            data['created_at'] = datetime.fromisoformat(data['created_at'])
+        # Create a copy to avoid mutating the original dict
+        data_copy = dict(data)
         
-        return cls(**data)
+        # Convert datetime string to datetime object
+        if isinstance(data_copy.get('created_at'), str):
+            data_copy['created_at'] = datetime.fromisoformat(data_copy['created_at'])
+        
+        import inspect
+        valid_keys = set(inspect.signature(cls).parameters.keys())
+        clean_data = {k: v for k, v in data_copy.items() if k in valid_keys}
+        
+        return cls(**clean_data)

@@ -81,14 +81,21 @@ class IdeaNode:
         Returns:
             IdeaNode instance
         """
+        # Create a copy to avoid mutating the original dict
+        data_copy = dict(data)
+        
         # Convert stage string to enum
-        if isinstance(data.get('stage'), str):
-            data['stage'] = EvolutionStage.from_string(data['stage'])
+        if isinstance(data_copy.get('stage'), str):
+            data_copy['stage'] = EvolutionStage.from_string(data_copy['stage'])
         
         # Convert datetime strings to datetime objects
-        if isinstance(data.get('created_at'), str):
-            data['created_at'] = datetime.fromisoformat(data['created_at'])
-        if isinstance(data.get('updated_at'), str):
-            data['updated_at'] = datetime.fromisoformat(data['updated_at'])
+        if isinstance(data_copy.get('created_at'), str):
+            data_copy['created_at'] = datetime.fromisoformat(data_copy['created_at'])
+        if isinstance(data_copy.get('updated_at'), str):
+            data_copy['updated_at'] = datetime.fromisoformat(data_copy['updated_at'])
         
-        return cls(**data)
+        import inspect
+        valid_keys = set(inspect.signature(cls).parameters.keys())
+        clean_data = {k: v for k, v in data_copy.items() if k in valid_keys}
+        
+        return cls(**clean_data)
