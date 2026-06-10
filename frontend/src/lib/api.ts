@@ -19,10 +19,10 @@ export const authFetch = async (url: string, options: RequestInit = {}) => {
     headers["Authorization"] = `Bearer ${token}`;
   }
   
-  // If the URL is relative, point it to the configured backend URL or fallback to localhost
+  // If the URL is relative, point it to the configured backend URL or fallback to Render
   let targetUrl = url;
   if (url.startsWith("/api")) {
-    const apiBase = import.meta.env.VITE_API_URL || "http://localhost:5000";
+    const apiBase = import.meta.env.VITE_API_URL || "https://idea-tracker-apdi.onrender.com";
     targetUrl = `${apiBase}${url}`;
   }
   
