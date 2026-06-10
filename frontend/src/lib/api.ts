@@ -19,10 +19,11 @@ export const authFetch = async (url: string, options: RequestInit = {}) => {
     headers["Authorization"] = `Bearer ${token}`;
   }
   
-  // If the URL is relative, point it to the local port (e.g. 5000) or keep it relative for deployment
+  // If the URL is relative, point it to the configured backend URL or fallback to localhost
   let targetUrl = url;
   if (url.startsWith("/api")) {
-    targetUrl = `http://localhost:5000${url}`;
+    const apiBase = import.meta.env.VITE_API_URL || "http://localhost:5000";
+    targetUrl = `${apiBase}${url}`;
   }
   
   try {
