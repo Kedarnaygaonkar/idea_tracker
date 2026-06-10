@@ -30,7 +30,13 @@ import re
 import requests
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": [
+    "https://idea-tracker-4m52.vercel.app",
+    "http://localhost:5173",
+    "http://localhost:8080",
+    "http://localhost:3000",
+    "*"
+]}}, supports_credentials=True)
 
 from backend.services.auth_service import hash_password, verify_password
 
