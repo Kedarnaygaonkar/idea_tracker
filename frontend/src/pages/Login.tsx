@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { authFetch } from "@/lib/api";
 
 export default function Login() {
   const [isLogin, setIsLogin] = useState(true);
@@ -32,7 +33,7 @@ export default function Login() {
     const endpoint = isLogin ? "/api/auth/login" : "/api/auth/register";
 
     try {
-      const response = await fetch(endpoint, {
+      const response = await authFetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -51,7 +52,7 @@ export default function Login() {
         } else {
           toast.success("Registration successful! Initiating first login...");
           // Auto login after registration
-          const loginResponse = await fetch("/api/auth/login", {
+          const loginResponse = await authFetch("/api/auth/login", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -88,7 +89,7 @@ export default function Login() {
 
     try {
       // 1. Try to Register the Guest
-      const regResponse = await fetch("/api/auth/register", {
+      const regResponse = await authFetch("/api/auth/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -97,7 +98,7 @@ export default function Login() {
       });
 
       // 2. Log in the Guest
-      const loginResponse = await fetch("/api/auth/login", {
+      const loginResponse = await authFetch("/api/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
